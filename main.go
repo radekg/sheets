@@ -7,11 +7,6 @@ const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var lletters = len(letters)
 
 func letterAt(i int) string {
-	if i < 0 {
-		// at _Z_ this comes in as -1
-		// at _Z_ this comes in as -1
-		i = lletters - 1
-	}
 	return letters[i : i+1]
 }
 
