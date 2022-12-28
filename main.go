@@ -25,11 +25,16 @@ type Column interface {
 	Index() int
 	Label() string
 	SetIndex(index int) (Column, error)
+	SetLabel(label string) (Column, error)
 	String() string
 }
 
-func NewDefaultColumn(index int) (Column, error) {
+func NewColumnWintIndex(index int) (Column, error) {
 	return (&defaultColumn{}).SetIndex(index)
+}
+
+func NewColumnWintLabel(label string) (Column, error) {
+	return (&defaultColumn{}).SetLabel(label)
 }
 
 type defaultColumn struct {
@@ -46,8 +51,11 @@ func (c *defaultColumn) Label() string {
 }
 
 func (c *defaultColumn) SetIndex(index int) (Column, error) {
-	c.index = index
-	return c.updateWithIndex(index)
+	return c.updateWithIndex(index - 1)
+}
+
+func (c *defaultColumn) SetLabel(label string) (Column, error) {
+	return c.updateWithLabel(label)
 }
 
 func (c *defaultColumn) String() string {
@@ -61,7 +69,7 @@ func (c *defaultColumn) updateWithIndex(index int) (Column, error) {
 		c.label = letterAt(index)
 		return c, nil
 	}
-	if c.index < lenXX {
+	if index < lenXX {
 		w := int(index / lenX)
 		r := index - w*lenX
 		c.index = index
@@ -86,5 +94,39 @@ func (c *defaultColumn) updateWithIndex(index int) (Column, error) {
 		return c, nil
 	}
 
-	return nil, fmt.Errorf("index %d too large", c.index+1)
+	return nil, ErrorIndexTooLarge(index + 1)
+}
+
+func (c *defaultColumn) updateWithLabel(label string) (Column, error) {
+	bs := []byte(label)
+	lbs := len(bs)
+	for idx, b := range bs {
+		if !isValidLetterByte(b) {
+			return nil, ErrorLabelCharacterInvalid(idx, label)
+		}
+	}
+	switch lbs {
+	case 1:
+		c.label = label
+		c.index = int(bs[0] - 65)
+	case 2:
+		n1 := int(bs[0] - 65 + 1)
+		n2 := int(bs[1] - 65)
+		c.label = label
+		c.index = n1*lenX + n2
+	case 3:
+		n1 := int(bs[0] - 65 + 1)
+		n2 := int(bs[1] - 65 + 1)
+		n3 := int(bs[2] - 65)
+		c.label = label
+		c.index = n1*lenX*lenX + n2*lenX + n3
+	default:
+		return nil, ErrorLabelLengthInvalid(label)
+	}
+
+	return c, nil
+}
+
+func isValidLetterByte(b byte) bool {
+	return b >= 65 && b <= 90
 }
