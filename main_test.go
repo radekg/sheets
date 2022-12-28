@@ -43,3 +43,18 @@ func TestLabelErrors(t *testing.T) {
 	assert.Nil(t, c)
 	assert.True(t, IsErrorIndexTooLarge(e))
 }
+
+func TestColumnComparators(t *testing.T) {
+	col1, e := NewColumnWintLabel("AA")
+	assert.Nil(t, e)
+	col2, e := NewColumnWintLabel("CA")
+	assert.Nil(t, e)
+
+	assert.Equal(t, 1, col2.Compare(col1))
+	assert.Equal(t, -1, col1.Compare(col2))
+
+	col3, e := NewColumnWintLabel("CA")
+	assert.Nil(t, e)
+
+	assert.Equal(t, 0, col3.Compare(col2))
+}

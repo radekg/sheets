@@ -22,6 +22,7 @@ func letterAt(i int) string {
 }
 
 type Column interface {
+	Compare(another Column) int
 	Index() int
 	Label() string
 	SetIndex(index int) (Column, error)
@@ -40,6 +41,16 @@ func NewColumnWintLabel(label string) (Column, error) {
 type defaultColumn struct {
 	index int
 	label string
+}
+
+func (c *defaultColumn) Compare(another Column) int {
+	if c.index < another.Index() {
+		return -1
+	}
+	if c.index > another.Index() {
+		return 1
+	}
+	return 0
 }
 
 func (c *defaultColumn) Index() int {
